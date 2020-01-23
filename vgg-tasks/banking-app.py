@@ -1,24 +1,31 @@
 #  test data
 account = {
-    "test@gmail.com": {"firstname": "user", "password": "test123", "balance": 1000.0}
+    "email": "test@gmail.com",
+    "details": {
+        "firstname": "user",
+        "password": "test123",
+        "balance": 1000.0
+    }
 }
-#Create a new account
+
+  #Create a new account
 def create_account():
-    global firstname
-    print("Welcome to Up4naija Bank,\nPlease input your details correctly")
+    print("Welcome to Up4naija Bank,\nPleas input your details correctly")
     print("=========================================")
     email = input("Enter your email: ").lower()
     # check if account id already exists
     if ("@" in email) and ("." in email):
-        if email in account.keys():
+        if email == account["email"]:
             print("This email already exists.")
             transaction()
         else:
             firstname = input("Enter your firstname: ").lower()
             password = input("Enter your password: ")
-# set the balance to $0.0
-            balance = 0.0
-            account[email] = {"firstname": firstname, "password": password, "balance": balance}
+            # initialize the balance to $0.0
+            account["email"] = email
+            account["details"]["firstname"] = firstname
+            account["details"]["password"] = password
+            account["details"]["balance"] = 0.0
             print("Mr."+ firstname +" Account successfully created, Proceed to make a transaction")
             print("=========================================")
             transaction()
@@ -31,20 +38,20 @@ def transaction():
     print("Hello customer!")
     print("                          ")
     email = input("Please verify your email: ").lower()
-# check if user exists or not
-    if email not in account.keys():
-        print("Sorry Account does not exist, Please Create an account now. ")
-        create_account()
+    # check if user exists or not
+    #if email not in account.keys():
+    if email != account["email"]:
+        print("Sorry Account does not exist, Please Create account")
     else:
-        print("Hello "+ firstname )
+        print("Hello Mr."+ account["details"]["firstname"])
         password = input("Please enter your password: ")
-# check if supplied password matches with the saved password to authenticate user
-        if password == account[email]["password"]:
-            print(firstname + " you have been authenticated")
+        # check if supplied password matches with the saved password to authenticate user
+        if password == account["details"]["password"]:
+            print(account["details"]["firstname"] + " you have been authenticated")
             print("=========================================")
-# user is authenticated and is shown services available
+            # user is authenticated and is shown services available
             print("Please select a transaction type")
-            services = input("Press 1: Check Account balance\nPress 2: Withdraw Funds\nPress 3: Desopit Funds\nPress 4: Transfer Funds ")
+            services = input("Press 1: Check balance\nPress 2: Deposit\nPress 3: Withdraw\nPress 4: Transfer ")
             print("                                         ")
             if services == "1":
                 check_balance(email)
@@ -68,63 +75,11 @@ def transaction():
 
 def check_balance(email):
     # query data structure to get current user balance
-    balance = account[email]["balance"]
+    balance = account["details"]["balance"]
     print("Your balance is ", balance)
     print("===============================")
-    print("Thank you for banking with us, " + firstname +".")
+    print("Thank you for banking with us")
     continue_banking = input("Would you like to perform another transaction, Y/N: ").lower()
-    if continue_banking == "y":
-        transaction()
-    elif continue_banking == "n":
-        print("Thank you for banking with us, " + firstname +".")
-        quit()
-    else:
-        print("Invalid input")
-        print("===============================")
-        print(continue_banking)
-
-#Transfer funds
-def transfer(email):
-    recipient = input("Please enter the beneficiary's email: ").lower()
-    if recipient not in account.keys():
-        print("Beneficiary account does not exist, Please try again")
-        transfer(email)
-    transfer_amount = input("Please enter the amount to transfer: ")
-    while True:
-        try:
-            actual_amount = float(transfer_amount)
-            if actual_amount > 0.0:
-                break
-            else:
-                print("Invalid amount, please enter figures only")
-                transfer_amount = input("Please enter the amount to transfer")
-        except ValueError:
-            print("Invalid amount, please enter figures only")
-            transfer_amount = input("Please enter the amount to transfer")
-    current_balance = account[email]["balance"]
-    # check if there is sufficient balance for the transaction
-    if current_balance < actual_amount:
-        print("Insufficient funds, your current balance is", current_balance)
-        print("Would you make a DEPOSIT now? Yes or No")
-        option = input()
-        if option.lower() == "yes":
-            deposit(email)
-        elif option.lower() == "no":
-            print("===============================")
-            print("Thank you for banking with us")
-            quit()
-        else:
-            print("Invalid selection")
-    else:
-        account[email]["balance"] = current_balance - actual_amount
-        new_balance = account[email]["balance"]
-        recipient_balance = account[recipient]["balance"]
-        account[recipient]["balance"] = recipient_balance + actual_amount
-        print("You have transferred", actual_amount, "to", recipient, "Your new balance is ", new_balance)
-        print("===============================")
-        print("Thank you for accounting with us")
-        print("===============================")
-        continue_banking = input("Would you like to perform another transaction, Y/N: ").lower()
     if continue_banking == "y":
         transaction()
     elif continue_banking == "n":
@@ -134,6 +89,8 @@ def transfer(email):
         print("Invalid input")
         print("===============================")
         print(continue_banking)
+
+
 
 def deposit(email):
     #Deposit funds
@@ -166,7 +123,7 @@ def deposit(email):
         print("===============================")
         print(continue_banking)
 
-#Withdraw funds
+ #Withdraw funds
 def withdraw(email):
     withdrawal_amount = input("Please enter an amount to withdraw: ")
     # check if there is sufficient balance for the transaction
@@ -180,14 +137,14 @@ def withdraw(email):
                 withdrawal_amount = input("Please enter an amount to withdraw")
         except ValueError:
             print("Invalid amount, please enter figures only")
-            withdrawal_amount = input("Please enter an amount to withdraw")
-    current_balance = account[email]["balance"]
+        withdrawal_amount = input("Please enter an amount to withdraw")
+        current_balance = account["details"]["balance"]
     if current_balance < valid_withdrawal_amount:
         print("Insufficient funds, your current balance is", current_balance)
-        deposit_now = input("Would you make a DEPOSIT now? Y or N: ")
-        if deposit_now.lower() == "y":
+        option = input("Would you make a DEPOSIT now? Y or N: ")
+        if option.lower() == "y":
             deposit(email)
-        elif deposit_now.lower() == "n":
+        elif option.lower() == "n":
             print("===============================")
             print("Thank you for banking with us")
             quit()
@@ -208,6 +165,60 @@ def withdraw(email):
         print("Invalid input")
         print("===============================")
         print(continue_banking)
+
+#Transfer funds
+def transfer(email):
+    recipient = input("Please enter the beneficiary's email: ").lower()
+    if recipient not in account["email"]:
+        print("Beneficiary account does not exist, Please try again")
+        transfer(email)
+    transfer_amount = input("Please enter the amount to transfer: ")
+    while True:
+        try:
+            actual_amount = float(transfer_amount)
+            if actual_amount > 0.0:
+                break
+            else:
+                print("Invalid amount, please enter figures only")
+                transfer_amount = input("Please enter the amount to transfer")
+        except ValueError:
+            print("Invalid amount, please enter figures only")
+            transfer_amount = input("Please enter the amount to transfer")
+    current_balance = account["details"]["balance"]
+    # check if there is sufficient balance for the transaction
+    if current_balance < actual_amount:
+        print("Insufficient funds, your current balance is", current_balance)
+        print("Would you make a DEPOSIT now? Yes or No")
+        option = input()
+        if option.lower() == "yes":
+            deposit(email)
+        elif option.lower() == "no":
+            print("===============================")
+            print("Thank you for banking with us")
+            quit()
+        else:
+            print("Invalid selection")
+            deposit(email)
+    else:
+        current_balance = current_balance - actual_amount
+        new_balance = current_balance
+        recipient_balance = account[recipient]["balance"]
+        account[recipient]["balance"] = recipient_balance + actual_amount
+        print("You have transferred", actual_amount, "to", recipient, "Your new balance is ", new_balance)
+        print("===============================")
+        print("Thank you for accounting with us")
+        print("===============================")
+        continue_banking = input("Would you like to perform another transaction, Y/N: ").lower()
+    if continue_banking == "y":
+        transaction()
+    elif continue_banking == "n":
+        print("Thank you for banking with Us.")
+        quit()
+    else:
+        print("Invalid input")
+        print("===============================")
+        print(continue_banking)
+
 Bank = input("Press 1: Create Account \nPress 2: Transaction \nPress q to quit ")
 while True:
     if Bank == "1" or Bank == "2" or Bank == "q":
