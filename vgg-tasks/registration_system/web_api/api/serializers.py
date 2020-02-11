@@ -17,6 +17,7 @@ class UsersSerializer(serializers.ModelSerializer):
         return user
 
 class ProjectsSerializer(serializers.ModelSerializer):
+    act = serializers.StringRelatedField(many=True)
 
     class Meta:
         model = Projects
